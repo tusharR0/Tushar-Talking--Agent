@@ -3,7 +3,7 @@ import requests # type: ignore
 import os
 
 # 🔗 Backend URL (from environment or default to localhost)
-BACKEND_URL = os.getenv("BACKEND_URL", "http://127.0.0.1:8000/")
+BACKEND_URL = os.getenv("https://tushar-talking-agent.onrender.com/", "http://127.0.0.1:8000/")
 
 # 🎨 Page setup
 st.set_page_config(page_title="TailorTalk AI", layout="centered")
