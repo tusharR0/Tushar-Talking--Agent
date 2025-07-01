@@ -1,13 +1,13 @@
-from backend.calendar_utils import book_event, service, calendar_id
+from calendar_utils import book_event, service, calendar_id
 from datetime import datetime, timedelta
-import dateparser # type: ignore
-import pytz # type: ignore
+import dateparser  # type: ignore
+import pytz        # type: ignore
 import re
 
-# Timezone
+# India Standard Time
 IST = pytz.timezone('Asia/Kolkata')
 
-# State
+# Session state
 pending_booking = {}
 last_context = {}
 
@@ -85,7 +85,7 @@ def find_free_slot_between(start, end, duration_minutes=30):
 def run_agent(user_input):
     global pending_booking, last_context
 
-    # Confirmation
+    # Confirm booking if user says "yes"
     if user_input.strip().lower() in ["yes", "book it", "confirm", "sure"] and pending_booking:
         slot_start, slot_end = pending_booking["slot"]
         event = book_event(
@@ -96,7 +96,7 @@ def run_agent(user_input):
         pending_booking = {}
         return f"✅ Meeting booked for {slot_start.strftime('%A, %d %B %Y at %I:%M %p')}!\nEvent ID: {event.get('id')}"
 
-    # Parse
+    # Parse user's input
     start_time, end_time, has_date = smart_parse(user_input, last_context.get("date"))
     if has_date:
         last_context["date"] = start_time
@@ -117,7 +117,7 @@ def run_agent(user_input):
         else:
             return "❌ You're already booked during that time. Try a different slot."
 
-    # Otherwise, flexible range
+    # Flexible range logic
     slot_start, slot_end = find_free_slot_between(start_time, end_time)
     if slot_start:
         pending_booking = {"slot": (slot_start, slot_end)}
