@@ -4,10 +4,10 @@ import dateparser  # type: ignore
 import pytz        # type: ignore
 import re
 
-# India Standard Time
+# Timezone
 IST = pytz.timezone('Asia/Kolkata')
 
-# Session state
+# State
 pending_booking = {}
 last_context = {}
 
@@ -85,7 +85,7 @@ def find_free_slot_between(start, end, duration_minutes=30):
 def run_agent(user_input):
     global pending_booking, last_context
 
-    # Confirm booking if user says "yes"
+    # Booking confirmation
     if user_input.strip().lower() in ["yes", "book it", "confirm", "sure"] and pending_booking:
         slot_start, slot_end = pending_booking["slot"]
         event = book_event(
@@ -96,7 +96,7 @@ def run_agent(user_input):
         pending_booking = {}
         return f"✅ Meeting booked for {slot_start.strftime('%A, %d %B %Y at %I:%M %p')}!\nEvent ID: {event.get('id')}"
 
-    # Parse user's input
+    # Parse intent
     start_time, end_time, has_date = smart_parse(user_input, last_context.get("date"))
     if has_date:
         last_context["date"] = start_time
@@ -104,6 +104,7 @@ def run_agent(user_input):
     is_fixed = (end_time - start_time) <= timedelta(minutes=31)
 
     if is_fixed:
+        # Check for conflicts
         events = service.events().list(
             calendarId=calendar_id,
             timeMin=start_time.isoformat(),
@@ -111,16 +112,21 @@ def run_agent(user_input):
             singleEvents=True
         ).execute()
 
+        print("🧪 Calendar check:", events.get("items", []))  # Debugging
+
         if not events.get("items", []):
             pending_booking = {"slot": (start_time, end_time)}
             return f"🕒 You're free on {start_time.strftime('%A, %d %B %Y at %I:%M %p')}. Shall I book it?"
         else:
-            return "❌ You're already booked during that time. Try a different slot."
+            conflict = events.get("items")[0]
+            when = conflict['start'].get('dateTime', conflict['start'].get('date'))
+            return f"❌ You're already booked at {when}. Try another time."
 
-    # Flexible range logic
+    # Handle flexible ranges
     slot_start, slot_end = find_free_slot_between(start_time, end_time)
     if slot_start:
         pending_booking = {"slot": (slot_start, slot_end)}
         return f"🕒 You're free on {slot_start.strftime('%A at %I:%M %p')}. Shall I book it?"
     else:
         return "❌ You're already booked during that time range. Try another window."
+
