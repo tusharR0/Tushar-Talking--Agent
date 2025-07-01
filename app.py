@@ -16,6 +16,13 @@ if "messages" not in st.session_state:
 
 # 💬 Capture user input from chat
 user_input = st.chat_input("Ask me to book a meeting...")
+with st.expander("💡 Example Prompts", expanded=True):
+    st.markdown("""
+    - 🗓️ **Book a meeting on 29 July at 4 PM**
+    - 🤖 **Schedule a call tomorrow afternoon**
+    - 📆 **Do I have free time this Friday?**
+    - ⏰ **Book a meeting between 3–5 PM next week**
+    """)
 
 if user_input:
     # ➕ Add user message to chat history
