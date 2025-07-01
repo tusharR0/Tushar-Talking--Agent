@@ -17,8 +17,8 @@ credentials = service_account.Credentials.from_service_account_file(
 # ✅ Build the Google Calendar service
 service = build('calendar', 'v3', credentials=credentials)
 
-# ✅ Calendar ID (usually 'primary' or email)
-calendar_id = 'tusharraut704@gmail.com'
+# ✅ Use 'primary' calendar associated with the service account
+calendar_id = 'primary'
 
 # ✅ Optional: Return dummy free slots
 def get_free_slots():
